@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡記帳 - 雲端連線版</title>
+    <title>極簡記帳 - 大字體舒適版</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,17 +13,17 @@
         input[type=number] { -moz-appearance: textfield; }
         select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em;
+            background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; /* 放大箭頭 */
         }
         .nav-btn { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            width: 4.5rem; height: 3.5rem; color: #9ca3af; 
+            width: 5rem; height: 4rem; color: #9ca3af; /* 加寬加高 */
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 1.25rem;
         }
         .nav-btn.active { color: #4f46e5; background-color: #eef2ff; box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.1); transform: translateY(-2px); }
-        .nav-btn svg { width: 22px; height: 22px; margin-bottom: 2px; transition: all 0.3s ease; }
+        .nav-btn svg { width: 26px; height: 26px; margin-bottom: 2px; transition: all 0.3s ease; } /* 放大圖示 */
         .nav-btn.active svg { transform: scale(1.1); stroke-width: 2.5; }
-        .nav-btn span { font-size: 0.65rem; font-weight: 700; }
+        .nav-btn span { font-size: 0.85rem; font-weight: 700; } /* 放大標籤文字 */
         
         /* Modal 動畫 */
         .modal-enter { opacity: 0; transform: scale(0.95) translateY(10px); }
@@ -34,8 +34,8 @@
 
     <!-- 全域載入畫面 (Loading Overlay) -->
     <div id="global-loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
-        <div class="animate-spin rounded-full h-14 w-14 border-4 border-indigo-100 border-t-indigo-600 mb-4 shadow-lg shadow-indigo-200"></div>
-        <div class="text-indigo-600 font-extrabold tracking-widest text-sm animate-pulse">雲端同步中...</div>
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-100 border-t-indigo-600 mb-4 shadow-lg shadow-indigo-200"></div>
+        <div class="text-indigo-600 font-extrabold tracking-widest text-lg animate-pulse">雲端同步中...</div>
     </div>
 
     <main class="w-full max-w-md bg-[#f8fafc] shadow-2xl relative pb-32 min-h-screen overflow-x-hidden">
@@ -43,9 +43,9 @@
         <!-- ==================== 分頁 1: 登帳 ==================== -->
         <div id="tab-record" class="tab-content block">
             <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 px-6 pt-8 pb-12 text-center rounded-b-[2.5rem] shadow-lg shadow-purple-200/50">
-                <h1 class="text-lg font-bold text-white/90 tracking-widest">日常記帳</h1>
-                <div class="mt-2 text-4xl font-extrabold text-white tracking-tight drop-shadow-md" id="today-total">$0</div>
-                <div class="text-[11px] text-white/80 mt-1 font-medium tracking-wider">目前總結餘</div>
+                <h1 class="text-xl font-bold text-white/90 tracking-widest">日常記帳</h1>
+                <div class="mt-2 text-5xl font-extrabold text-white tracking-tight drop-shadow-md" id="today-total">$0</div>
+                <div class="text-sm text-white/90 mt-2 font-medium tracking-wider">目前總結餘</div>
             </div>
 
             <div class="px-5 -mt-6 relative z-10 space-y-6">
@@ -53,32 +53,32 @@
                     <div class="flex p-1 bg-gray-50 rounded-2xl border border-gray-100">
                         <label class="flex-1 text-center cursor-pointer">
                             <input type="radio" name="type" value="expense" class="peer sr-only" checked>
-                            <div class="py-2.5 rounded-xl text-sm font-bold text-gray-400 peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm transition-all">支出</div>
+                            <div class="py-3 rounded-xl text-lg font-bold text-gray-400 peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm transition-all">支出</div>
                         </label>
                         <label class="flex-1 text-center cursor-pointer">
                             <input type="radio" name="type" value="income" class="peer sr-only">
-                            <div class="py-2.5 rounded-xl text-sm font-bold text-gray-400 peer-checked:bg-white peer-checked:text-teal-600 peer-checked:shadow-sm transition-all">收入</div>
+                            <div class="py-3 rounded-xl text-lg font-bold text-gray-400 peer-checked:bg-white peer-checked:text-teal-600 peer-checked:shadow-sm transition-all">收入</div>
                         </label>
                     </div>
 
                     <div class="flex space-x-3">
                         <div class="w-1/3">
-                            <input type="date" id="date" required class="w-full px-2 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xs font-bold text-gray-600 text-center">
+                            <input type="date" id="date" required class="w-full px-2 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-base font-bold text-gray-700 text-center">
                         </div>
                         <div class="w-2/3 relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span class="text-indigo-300 text-lg font-bold">$</span>
+                                <span class="text-indigo-400 text-2xl font-bold">$</span>
                             </div>
-                            <input type="number" id="amount" required min="1" class="w-full pl-8 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xl font-bold text-gray-700 placeholder-gray-300" placeholder="輸入金額">
+                            <input type="number" id="amount" required min="1" class="w-full pl-9 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-3xl font-extrabold text-gray-800 placeholder-gray-300" placeholder="金額">
                         </div>
                     </div>
 
                     <div class="flex space-x-3">
                         <div class="w-1/2">
-                            <select id="category" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 font-bold text-sm"></select>
+                            <select id="category" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-700 font-bold text-lg"></select>
                         </div>
                         <div class="w-1/2">
-                            <select id="payment-method" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 font-bold text-sm">
+                            <select id="payment-method" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-700 font-bold text-lg">
                                 <option value="現金">💵 現金</option>
                                 <option value="刷卡">💳 刷卡</option>
                                 <option value="轉帳">🏦 轉帳</option>
@@ -88,20 +88,20 @@
                     </div>
 
                     <div>
-                        <input type="text" id="note" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 text-sm font-medium placeholder-gray-400" placeholder="項目說明 / 備註...">
+                        <input type="text" id="note" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-700 text-lg font-medium placeholder-gray-400" placeholder="項目說明 / 備註...">
                     </div>
 
-                    <button type="submit" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all tracking-wide">
+                    <button type="submit" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xl font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all tracking-wide">
                         記一筆
                     </button>
                 </form>
 
                 <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
-                    <h2 class="text-sm font-bold text-gray-800 mb-4 pl-1 flex items-center">
-                        <span class="w-1.5 h-4 bg-indigo-500 rounded-full mr-2"></span>近期新增
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 pl-1 flex items-center">
+                        <span class="w-2 h-5 bg-indigo-500 rounded-full mr-2"></span>近期新增
                     </h2>
-                    <ul id="recent-list" class="space-y-3">
-                        <li class="text-center py-6 text-gray-400 text-sm font-medium">尚未新增紀錄</li>
+                    <ul id="recent-list" class="space-y-4">
+                        <li class="text-center py-6 text-gray-400 text-base font-medium">尚未新增紀錄</li>
                     </ul>
                 </div>
             </div>
@@ -110,15 +110,15 @@
         <!-- ==================== 分頁 2: 每日帳 ==================== -->
         <div id="tab-daily" class="tab-content hidden">
             <div class="bg-gradient-to-br from-teal-400 to-emerald-500 px-6 pt-8 pb-12 rounded-b-[2.5rem] shadow-lg shadow-teal-200/50">
-                <h1 class="text-lg font-bold text-white text-center tracking-widest mb-4">每日明細</h1>
-                <div class="flex justify-between px-2 text-sm text-teal-50 font-medium">
+                <h1 class="text-xl font-bold text-white text-center tracking-widest mb-4">每日明細</h1>
+                <div class="flex justify-between px-2 text-base text-teal-50 font-medium">
                     <div class="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl w-[48%] shadow-inner border border-white/20">
-                        <span class="text-xs text-teal-100">收入</span> 
-                        <span id="daily-income" class="font-bold text-white text-xl block mt-0.5">$0</span>
+                        <span class="text-sm text-teal-100">收入</span> 
+                        <span id="daily-income" class="font-bold text-white text-2xl block mt-1">$0</span>
                     </div>
                     <div class="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl w-[48%] shadow-inner border border-white/20 text-right">
-                        <span class="text-xs text-emerald-100">支出</span> 
-                        <span id="daily-expense" class="font-bold text-white text-xl block mt-0.5">$0</span>
+                        <span class="text-sm text-emerald-100">支出</span> 
+                        <span id="daily-expense" class="font-bold text-white text-2xl block mt-1">$0</span>
                     </div>
                 </div>
             </div>
@@ -126,35 +126,35 @@
             <div class="px-5 -mt-6 relative z-10 pb-8">
                 <div class="bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6 flex items-center justify-between">
                     <button onclick="changeDailyDate(-1)" class="p-3 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-2xl transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
-                    <input type="date" id="daily-date-picker" class="bg-transparent text-gray-700 font-extrabold outline-none text-center text-base tracking-wide">
+                    <input type="date" id="daily-date-picker" class="bg-transparent text-gray-800 font-extrabold outline-none text-center text-xl tracking-wide">
                     <button onclick="changeDailyDate(1)" class="p-3 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-2xl transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
-                <ul id="daily-list" class="space-y-3"></ul>
+                <ul id="daily-list" class="space-y-4"></ul>
             </div>
         </div>
 
         <!-- ==================== 分頁 3: 查詢 ==================== -->
         <div id="tab-query" class="tab-content hidden">
             <div class="bg-gradient-to-br from-blue-500 to-cyan-400 px-6 pt-8 pb-10 rounded-b-[2.5rem] shadow-lg shadow-blue-200/50 text-white">
-                <h1 class="text-lg font-bold text-center tracking-widest">查詢帳目</h1>
+                <h1 class="text-xl font-bold text-center tracking-widest">查詢帳目</h1>
             </div>
             
             <div class="px-5 -mt-6 relative z-10 pb-8">
                 <div class="bg-white p-5 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6 space-y-4">
                     <div class="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl border border-gray-100">
-                        <input type="date" id="query-start" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
-                        <span class="text-gray-300 font-bold">~</span>
-                        <input type="date" id="query-end" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                        <input type="date" id="query-start" class="w-1/2 px-2 py-3 bg-transparent text-gray-800 text-base font-bold outline-none text-center">
+                        <span class="text-gray-400 font-bold">~</span>
+                        <input type="date" id="query-end" class="w-1/2 px-2 py-3 bg-transparent text-gray-800 text-base font-bold outline-none text-center">
                     </div>
                     <div class="flex space-x-3">
-                        <select id="query-category" class="w-1/2 px-4 pr-8 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-sm outline-none text-gray-700 font-bold">
+                        <select id="query-category" class="w-1/2 px-4 pr-8 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-base outline-none text-gray-800 font-bold">
                             <option value="all">所有類別</option>
                         </select>
-                        <select id="query-payment" class="w-1/2 px-4 pr-8 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-sm outline-none text-gray-700 font-bold">
+                        <select id="query-payment" class="w-1/2 px-4 pr-8 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-base outline-none text-gray-800 font-bold">
                             <option value="all">所有支付方式</option>
                             <option value="現金">💵 現金</option>
                             <option value="刷卡">💳 刷卡</option>
@@ -163,33 +163,33 @@
                         </select>
                     </div>
                     <div class="flex space-x-3">
-                        <input type="text" id="query-note" class="w-2/3 px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none text-gray-700 placeholder-gray-400" placeholder="搜尋備註關鍵字...">
-                        <button onclick="doQuery()" class="w-1/3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-md active:scale-95 transition-all text-sm tracking-wide">搜尋</button>
+                        <input type="text" id="query-note" class="w-2/3 px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-base outline-none text-gray-800 placeholder-gray-400" placeholder="搜尋關鍵字...">
+                        <button onclick="doQuery()" class="w-1/3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-bold rounded-2xl shadow-md active:scale-95 transition-all tracking-wide">搜尋</button>
                     </div>
                 </div>
                 
-                <div class="flex justify-between items-end mb-3 px-2">
-                    <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
-                        <span class="w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>搜尋結果
+                <div class="flex justify-between items-end mb-4 px-2">
+                    <h2 class="text-lg font-bold text-gray-800 pl-1 flex items-center">
+                        <span class="w-2 h-5 bg-blue-400 rounded-full mr-2"></span>搜尋結果
                     </h2>
-                    <div class="text-xs text-gray-400 font-medium bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100" id="query-result-text">請設定條件</div>
+                    <div class="text-sm text-gray-500 font-bold bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-100" id="query-result-text">請設定條件</div>
                 </div>
-                <ul id="query-list" class="space-y-3"></ul>
+                <ul id="query-list" class="space-y-4"></ul>
             </div>
         </div>
 
         <!-- ==================== 分頁 4: 統計 ==================== -->
         <div id="tab-stats" class="tab-content hidden">
             <div class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-600 px-6 pt-8 pb-[4.5rem] text-white rounded-b-[2.5rem] shadow-lg shadow-blue-200/50">
-                <h1 class="text-lg font-bold text-center mb-4 tracking-widest">區間統計</h1>
+                <h1 class="text-xl font-bold text-center mb-4 tracking-widest">區間統計</h1>
                 <div class="flex space-x-4 px-2">
-                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-3 border border-white/10">
-                        <div class="text-[10px] text-blue-200 mb-1 tracking-wider uppercase">總收入</div>
-                        <div class="text-xl font-bold" id="stats-total-income">$0</div>
+                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-4 border border-white/10">
+                        <div class="text-xs text-blue-200 mb-1 tracking-wider uppercase font-bold">總收入</div>
+                        <div class="text-2xl font-bold" id="stats-total-income">$0</div>
                     </div>
-                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-3 border border-white/10">
-                        <div class="text-[10px] text-blue-200 mb-1 tracking-wider uppercase">總支出</div>
-                        <div class="text-xl font-bold" id="stats-total-expense">$0</div>
+                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-4 border border-white/10">
+                        <div class="text-xs text-blue-200 mb-1 tracking-wider uppercase font-bold">總支出</div>
+                        <div class="text-2xl font-bold" id="stats-total-expense">$0</div>
                     </div>
                 </div>
             </div>
@@ -197,40 +197,40 @@
             <div class="px-5 -mt-8 relative z-10 pb-8 space-y-5">
                 <div class="bg-white p-5 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50">
                     <div class="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl border border-gray-100 mb-4">
-                        <input type="date" id="stats-start" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
-                        <span class="text-gray-300 font-bold">~</span>
-                        <input type="date" id="stats-end" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                        <input type="date" id="stats-start" class="w-1/2 px-2 py-3 bg-transparent text-gray-800 text-base font-bold outline-none text-center">
+                        <span class="text-gray-400 font-bold">~</span>
+                        <input type="date" id="stats-end" class="w-1/2 px-2 py-3 bg-transparent text-gray-800 text-base font-bold outline-none text-center">
                     </div>
-                    <button onclick="doStats()" class="w-full py-3.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-2xl font-bold text-sm transition-all tracking-wide">重新計算區間</button>
+                    <button onclick="doStats()" class="w-full py-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-2xl text-lg font-bold transition-all tracking-wide">重新計算區間</button>
                 </div>
 
                 <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                     <div class="flex justify-between items-end mb-6">
-                        <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
-                            <span class="w-1.5 h-4 bg-indigo-500 rounded-full mr-2"></span>支出分類排行
+                        <h2 class="text-lg font-bold text-gray-800 pl-1 flex items-center">
+                            <span class="w-2 h-5 bg-indigo-500 rounded-full mr-2"></span>支出排行
                         </h2>
-                        <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">結餘 <span id="stats-net" class="ml-1">$0</span></div>
+                        <div class="text-sm font-bold text-indigo-700 bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">結餘 <span id="stats-net" class="ml-1">$0</span></div>
                     </div>
-                    <div id="stats-breakdown" class="space-y-5">
-                        <div class="text-center py-6 text-gray-400 text-sm font-medium">尚無資料</div>
+                    <div id="stats-breakdown" class="space-y-6">
+                        <div class="text-center py-6 text-gray-500 text-base font-medium">尚無資料</div>
                     </div>
                 </div>
                 
                 <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm mt-5">
                     <div class="flex justify-between items-end mb-6">
-                        <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
-                            <span class="w-1.5 h-4 bg-teal-500 rounded-full mr-2"></span>收入分類排行
+                        <h2 class="text-lg font-bold text-gray-800 pl-1 flex items-center">
+                            <span class="w-2 h-5 bg-teal-500 rounded-full mr-2"></span>收入排行
                         </h2>
                     </div>
-                    <div id="stats-income-breakdown" class="space-y-5">
-                        <div class="text-center py-6 text-gray-400 text-sm font-medium">尚無資料</div>
+                    <div id="stats-income-breakdown" class="space-y-6">
+                        <div class="text-center py-6 text-gray-500 text-base font-medium">尚無資料</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ==================== 底部導覽列 ==================== -->
-        <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[calc(28rem-2.5rem)] bg-white/90 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.08)] rounded-3xl z-40 px-3 py-2 flex justify-between items-center">
+        <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(28rem-2rem)] bg-white/95 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.12)] rounded-3xl z-40 px-2 py-2 flex justify-between items-center">
             <button class="nav-btn active" data-target="tab-record" onclick="switchTab('tab-record', this)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg><span>登帳</span>
             </button>
@@ -246,38 +246,38 @@
         </nav>
 
         <!-- ==================== 編輯與刪除 Modal ==================== -->
-        <div id="edit-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden flex-col justify-end sm:justify-center items-center pb-0 sm:pb-20">
+        <div id="edit-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex-col justify-end sm:justify-center items-center pb-0 sm:pb-20">
             <div class="absolute inset-0" onclick="closeEditModal()"></div>
             <div class="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="edit-modal-content">
                 <div class="p-6">
-                    <div class="flex justify-between items-center mb-5">
-                        <h3 class="text-lg font-bold text-gray-800">編輯紀錄</h3>
-                        <button onclick="closeEditModal()" class="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">編輯紀錄</h3>
+                        <button onclick="closeEditModal()" class="p-3 text-gray-500 hover:text-gray-800 bg-gray-100 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-5">
                         <input type="hidden" id="edit-id">
                         <div class="flex space-x-3">
-                            <input type="date" id="edit-date" class="w-1/3 px-2 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xs font-bold text-gray-600 text-center">
-                            <input type="number" id="edit-amount" class="w-2/3 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-lg font-bold text-gray-700" placeholder="金額">
+                            <input type="date" id="edit-date" class="w-1/3 px-2 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-base font-bold text-gray-800 text-center">
+                            <input type="number" id="edit-amount" class="w-2/3 px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-2xl font-extrabold text-gray-800" placeholder="金額">
                         </div>
                         <div class="flex space-x-3">
-                            <select id="edit-category" class="w-1/2 px-4 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-600 font-bold text-sm"></select>
-                            <select id="edit-payment" class="w-1/2 px-4 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-600 font-bold text-sm">
+                            <select id="edit-category" class="w-1/2 px-4 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-800 font-bold text-lg"></select>
+                            <select id="edit-payment" class="w-1/2 px-4 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-800 font-bold text-lg">
                                 <option value="現金">💵 現金</option>
                                 <option value="刷卡">💳 刷卡</option>
                                 <option value="轉帳">🏦 轉帳</option>
                                 <option value="行動支付">📱 行動支付</option>
                             </select>
                         </div>
-                        <input type="text" id="edit-note" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 text-sm" placeholder="項目說明 / 備註...">
+                        <input type="text" id="edit-note" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-800 text-lg font-medium" placeholder="項目說明 / 備註...">
                     </div>
 
-                    <div class="mt-6 flex space-x-3">
-                        <button onclick="deleteRecord()" class="w-1/3 py-3.5 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-xl transition-all">刪除</button>
-                        <button onclick="saveEdit()" class="w-2/3 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all">儲存修改</button>
+                    <div class="mt-8 flex space-x-4">
+                        <button onclick="deleteRecord()" class="w-1/3 py-4 bg-red-50 text-red-600 hover:bg-red-100 text-lg font-bold rounded-xl transition-all">刪除</button>
+                        <button onclick="saveEdit()" class="w-2/3 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded-xl shadow-md transition-all">儲存修改</button>
                     </div>
                 </div>
             </div>
@@ -296,7 +296,6 @@
         function showLoader() { document.getElementById('global-loader').classList.remove('hidden'); }
         function hideLoader() { document.getElementById('global-loader').classList.add('hidden'); }
 
-        // 產生相容於舊系統的 UUID
         const generateUUID = () => {
             return typeof crypto.randomUUID === 'function' 
                 ? crypto.randomUUID() 
@@ -325,7 +324,6 @@
             '銀行利息': 'bg-emerald-100 text-emerald-600', '其他': 'bg-yellow-100 text-yellow-600'
         };
 
-        // 初始化日期欄位
         document.getElementById('date').value = todayStr;
         document.getElementById('daily-date-picker').value = todayStr;
         
@@ -342,10 +340,6 @@
             }
         });
 
-        // ==========================================
-        // 核心：雲端 API 串接邏輯 (CRUD)
-        // ==========================================
-
         // 1. 讀取資料 (Read)
         async function loadDataFromCloud() {
             showLoader();
@@ -353,7 +347,6 @@
                 const response = await fetch(API_URL);
                 const result = await response.json();
                 if(result.status === 'success') {
-                    // 將資料反轉，確保最新紀錄在最上面
                     records = result.data.reverse();
                     refreshAllViews();
                 } else {
@@ -415,7 +408,6 @@
             const index = records.findIndex(r => r.id === id);
             
             if(index > -1) {
-                // 產生修改後的物件
                 const updatedRecord = {
                     ...records[index],
                     dateVal: document.getElementById('edit-date').value,
@@ -434,7 +426,7 @@
                     const result = await response.json();
                     
                     if(result.status === 'success') {
-                        records[index] = updatedRecord; // 更新本地端
+                        records[index] = updatedRecord; 
                         refreshAllViews();
                         closeEditModal();
                     } else {
@@ -463,7 +455,7 @@
                     const result = await response.json();
                     
                     if(result.status === 'success') {
-                        records = records.filter(r => r.id !== id); // 移除本地端資料
+                        records = records.filter(r => r.id !== id); 
                         refreshAllViews();
                         closeEditModal();
                     } else {
@@ -488,19 +480,19 @@
             const shortDate = r.dateVal.substring(5);
 
             return `
-                <li onclick="openEditModal('${r.id}')" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50/80 rounded-2xl hover:bg-white hover:scale-[1.01] active:scale-95 border border-gray-100 shadow-sm transition-all mb-3">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[15px] font-bold ${colorClass} shadow-sm">${r.category}</div>
+                <li onclick="openEditModal('${r.id}')" class="cursor-pointer flex items-center justify-between p-5 bg-gray-50/80 rounded-2xl hover:bg-white hover:scale-[1.01] active:scale-95 border border-gray-100 shadow-sm transition-all mb-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${colorClass} shadow-sm">${r.category}</div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-gray-700">${r.category}${typeLabel}</span>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span class="text-[10px] bg-white border border-gray-200 text-gray-500 px-1.5 py-0.5 rounded-md font-medium shadow-sm">${shortDate}</span>
-                                <span class="text-[10px] bg-indigo-50 border border-indigo-100 text-indigo-500 px-1.5 py-0.5 rounded-md font-medium shadow-sm">${r.paymentMethod}</span>
-                                ${r.note ? `<span class="text-xs text-gray-400 line-clamp-1 ml-1 font-medium">${r.note}</span>` : ''}
+                            <span class="text-lg font-bold text-gray-800">${r.category}${typeLabel}</span>
+                            <div class="flex items-center flex-wrap gap-2 mt-1.5">
+                                <span class="text-xs bg-white border border-gray-200 text-gray-500 px-2 py-1 rounded-md font-bold shadow-sm">${shortDate}</span>
+                                <span class="text-xs bg-indigo-50 border border-indigo-100 text-indigo-600 px-2 py-1 rounded-md font-bold shadow-sm">${r.paymentMethod}</span>
+                                ${r.note ? `<span class="text-sm text-gray-500 line-clamp-1 font-medium ml-1">${r.note}</span>` : ''}
                             </div>
                         </div>
                     </div>
-                    <div class="text-[17px] font-extrabold ${amountColor} tracking-tight">${sign}$${r.amount.toLocaleString()}</div>
+                    <div class="text-2xl font-black ${amountColor} tracking-tight">${sign}$${r.amount.toLocaleString()}</div>
                 </li>
             `;
         }
@@ -510,7 +502,7 @@
             document.getElementById('today-total').textContent = `$${total.toLocaleString()}`;
 
             const recentList = document.getElementById('recent-list');
-            recentList.innerHTML = records.slice(0, 3).map(renderRecordHTML).join('') || `<li class="text-center py-6 text-gray-400 text-sm font-medium">尚未新增紀錄</li>`;
+            recentList.innerHTML = records.slice(0, 3).map(renderRecordHTML).join('') || `<li class="text-center py-8 text-gray-400 text-base font-medium">尚未新增紀錄</li>`;
 
             updateDailyView();
             doQuery();
@@ -534,7 +526,6 @@
         });
         document.querySelector('input[name="type"]:checked').dispatchEvent(new Event('change'));
 
-        // ====== 編輯/刪除 Modal UI 控制 ======
         const modal = document.getElementById('edit-modal');
         const modalContent = document.getElementById('edit-modal-content');
 
@@ -565,7 +556,6 @@
             }, 300);
         }
 
-        // ====== 其他分頁邏輯 ======
         const dailyDatePicker = document.getElementById('daily-date-picker');
         dailyDatePicker.addEventListener('change', updateDailyView);
 
@@ -586,7 +576,7 @@
             }).join('');
             document.getElementById('daily-income').textContent = `$${income.toLocaleString()}`;
             document.getElementById('daily-expense').textContent = `$${expense.toLocaleString()}`;
-            document.getElementById('daily-list').innerHTML = html || `<div class="text-center py-10 text-gray-400 text-sm font-medium">這天沒有記帳喔</div>`;
+            document.getElementById('daily-list').innerHTML = html || `<div class="text-center py-12 text-gray-500 text-lg font-medium">這天沒有記帳喔</div>`;
         }
 
         function doQuery() {
@@ -605,7 +595,7 @@
             });
             
             document.getElementById('query-result-text').textContent = `共 ${filtered.length} 筆`;
-            document.getElementById('query-list').innerHTML = filtered.map(renderRecordHTML).join('') || `<div class="text-center py-6 text-gray-400 text-sm font-medium">沒有符合條件的紀錄</div>`;
+            document.getElementById('query-list').innerHTML = filtered.map(renderRecordHTML).join('') || `<div class="text-center py-10 text-gray-500 text-lg font-medium">沒有符合條件的紀錄</div>`;
         }
 
         function doStats() {
@@ -635,20 +625,17 @@
                     const colorClass = categoryColors[cat] || 'bg-indigo-100 text-indigo-600';
                     const bgColor = colorClass.split(' ')[0].replace('bg-', 'bg-').replace('-100', '-500'); 
                     return `
-                    <div class="mb-4">
-                        <div class="flex justify-between text-sm mb-2"><span class="font-extrabold text-gray-700">${cat} <span class="text-gray-400 font-medium ml-1 text-xs">${percent}%</span></span><span class="font-bold text-gray-800">$${amount.toLocaleString()}</span></div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden"><div class="${bgColor} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div></div>
+                    <div class="mb-5">
+                        <div class="flex justify-between text-base mb-2"><span class="font-extrabold text-gray-800">${cat} <span class="text-gray-500 font-bold ml-2 text-sm">${percent}%</span></span><span class="font-black text-gray-900">$${amount.toLocaleString()}</span></div>
+                        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden"><div class="${bgColor} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div></div>
                     </div>`;
-                }).join('') || `<div class="text-center py-6 text-gray-400 text-sm font-medium">${emptyMsg}</div>`;
+                }).join('') || `<div class="text-center py-8 text-gray-500 text-lg font-medium">${emptyMsg}</div>`;
             };
 
             document.getElementById('stats-breakdown').innerHTML = renderBreakdown(expenseCats, exp, '該區間無支出資料');
             document.getElementById('stats-income-breakdown').innerHTML = renderBreakdown(incomeCats, inc, '該區間無收入資料');
         }
 
-        // ==========================================
-        // 程式啟動起點：當網頁載入完成，向 Google Sheet 要資料
-        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             loadDataFromCloud();
         });
