@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>極簡記帳 - 雲端連線版</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隱藏數字輸入框的上下箭頭 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em;
+        }
+        .nav-btn { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            width: 4.5rem; height: 3.5rem; color: #9ca3af; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 1.25rem;
+        }
+        .nav-btn.active { color: #4f46e5; background-color: #eef2ff; box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.1); transform: translateY(-2px); }
+        .nav-btn svg { width: 22px; height: 22px; margin-bottom: 2px; transition: all 0.3s ease; }
+        .nav-btn.active svg { transform: scale(1.1); stroke-width: 2.5; }
+        .nav-btn span { font-size: 0.65rem; font-weight: 700; }
+        
+        /* Modal 動畫 */
+        .modal-enter { opacity: 0; transform: scale(0.95) translateY(10px); }
+        .modal-enter-active { opacity: 1; transform: scale(1) translateY(0); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen flex justify-center selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- 全域載入畫面 (Loading Overlay) -->
+    <div id="global-loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="animate-spin rounded-full h-14 w-14 border-4 border-indigo-100 border-t-indigo-600 mb-4 shadow-lg shadow-indigo-200"></div>
+        <div class="text-indigo-600 font-extrabold tracking-widest text-sm animate-pulse">雲端同步中...</div>
+    </div>
+
+    <main class="w-full max-w-md bg-[#f8fafc] shadow-2xl relative pb-32 min-h-screen overflow-x-hidden">
+        
+        <!-- ==================== 分頁 1: 登帳 ==================== -->
+        <div id="tab-record" class="tab-content block">
+            <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 px-6 pt-8 pb-12 text-center rounded-b-[2.5rem] shadow-lg shadow-purple-200/50">
+                <h1 class="text-lg font-bold text-white/90 tracking-widest">日常記帳</h1>
+                <div class="mt-2 text-4xl font-extrabold text-white tracking-tight drop-shadow-md" id="today-total">$0</div>
+                <div class="text-[11px] text-white/80 mt-1 font-medium tracking-wider">目前總結餘</div>
+            </div>
+
+            <div class="px-5 -mt-6 relative z-10 space-y-6">
+                <form id="expense-form" class="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50 space-y-5">
+                    <div class="flex p-1 bg-gray-50 rounded-2xl border border-gray-100">
+                        <label class="flex-1 text-center cursor-pointer">
+                            <input type="radio" name="type" value="expense" class="peer sr-only" checked>
+                            <div class="py-2.5 rounded-xl text-sm font-bold text-gray-400 peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm transition-all">支出</div>
+                        </label>
+                        <label class="flex-1 text-center cursor-pointer">
+                            <input type="radio" name="type" value="income" class="peer sr-only">
+                            <div class="py-2.5 rounded-xl text-sm font-bold text-gray-400 peer-checked:bg-white peer-checked:text-teal-600 peer-checked:shadow-sm transition-all">收入</div>
+                        </label>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <div class="w-1/3">
+                            <input type="date" id="date" required class="w-full px-2 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xs font-bold text-gray-600 text-center">
+                        </div>
+                        <div class="w-2/3 relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span class="text-indigo-300 text-lg font-bold">$</span>
+                            </div>
+                            <input type="number" id="amount" required min="1" class="w-full pl-8 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xl font-bold text-gray-700 placeholder-gray-300" placeholder="輸入金額">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <div class="w-1/2">
+                            <select id="category" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 font-bold text-sm"></select>
+                        </div>
+                        <div class="w-1/2">
+                            <select id="payment-method" required class="w-full pl-5 pr-10 py-4 bg-gray-50 border border-gray-100 rounded-2xl appearance-none focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 font-bold text-sm">
+                                <option value="現金">💵 現金</option>
+                                <option value="刷卡">💳 刷卡</option>
+                                <option value="轉帳">🏦 轉帳</option>
+                                <option value="行動支付">📱 行動支付</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <input type="text" id="note" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 text-sm font-medium placeholder-gray-400" placeholder="項目說明 / 備註...">
+                    </div>
+
+                    <button type="submit" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all tracking-wide">
+                        記一筆
+                    </button>
+                </form>
+
+                <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800 mb-4 pl-1 flex items-center">
+                        <span class="w-1.5 h-4 bg-indigo-500 rounded-full mr-2"></span>近期新增
+                    </h2>
+                    <ul id="recent-list" class="space-y-3">
+                        <li class="text-center py-6 text-gray-400 text-sm font-medium">尚未新增紀錄</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁 2: 每日帳 ==================== -->
+        <div id="tab-daily" class="tab-content hidden">
+            <div class="bg-gradient-to-br from-teal-400 to-emerald-500 px-6 pt-8 pb-12 rounded-b-[2.5rem] shadow-lg shadow-teal-200/50">
+                <h1 class="text-lg font-bold text-white text-center tracking-widest mb-4">每日明細</h1>
+                <div class="flex justify-between px-2 text-sm text-teal-50 font-medium">
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl w-[48%] shadow-inner border border-white/20">
+                        <span class="text-xs text-teal-100">收入</span> 
+                        <span id="daily-income" class="font-bold text-white text-xl block mt-0.5">$0</span>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl w-[48%] shadow-inner border border-white/20 text-right">
+                        <span class="text-xs text-emerald-100">支出</span> 
+                        <span id="daily-expense" class="font-bold text-white text-xl block mt-0.5">$0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-5 -mt-6 relative z-10 pb-8">
+                <div class="bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6 flex items-center justify-between">
+                    <button onclick="changeDailyDate(-1)" class="p-3 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-2xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <input type="date" id="daily-date-picker" class="bg-transparent text-gray-700 font-extrabold outline-none text-center text-base tracking-wide">
+                    <button onclick="changeDailyDate(1)" class="p-3 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-2xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+                <ul id="daily-list" class="space-y-3"></ul>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁 3: 查詢 ==================== -->
+        <div id="tab-query" class="tab-content hidden">
+            <div class="bg-gradient-to-br from-blue-500 to-cyan-400 px-6 pt-8 pb-10 rounded-b-[2.5rem] shadow-lg shadow-blue-200/50 text-white">
+                <h1 class="text-lg font-bold text-center tracking-widest">查詢帳目</h1>
+            </div>
+            
+            <div class="px-5 -mt-6 relative z-10 pb-8">
+                <div class="bg-white p-5 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6 space-y-4">
+                    <div class="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl border border-gray-100">
+                        <input type="date" id="query-start" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                        <span class="text-gray-300 font-bold">~</span>
+                        <input type="date" id="query-end" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                    </div>
+                    <div class="flex space-x-3">
+                        <select id="query-category" class="w-1/2 px-4 pr-8 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-sm outline-none text-gray-700 font-bold">
+                            <option value="all">所有類別</option>
+                        </select>
+                        <select id="query-payment" class="w-1/2 px-4 pr-8 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl appearance-none text-sm outline-none text-gray-700 font-bold">
+                            <option value="all">所有支付方式</option>
+                            <option value="現金">💵 現金</option>
+                            <option value="刷卡">💳 刷卡</option>
+                            <option value="轉帳">🏦 轉帳</option>
+                            <option value="行動支付">📱 行動支付</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-3">
+                        <input type="text" id="query-note" class="w-2/3 px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none text-gray-700 placeholder-gray-400" placeholder="搜尋備註關鍵字...">
+                        <button onclick="doQuery()" class="w-1/3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-md active:scale-95 transition-all text-sm tracking-wide">搜尋</button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-end mb-3 px-2">
+                    <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
+                        <span class="w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>搜尋結果
+                    </h2>
+                    <div class="text-xs text-gray-400 font-medium bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100" id="query-result-text">請設定條件</div>
+                </div>
+                <ul id="query-list" class="space-y-3"></ul>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁 4: 統計 ==================== -->
+        <div id="tab-stats" class="tab-content hidden">
+            <div class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-600 px-6 pt-8 pb-[4.5rem] text-white rounded-b-[2.5rem] shadow-lg shadow-blue-200/50">
+                <h1 class="text-lg font-bold text-center mb-4 tracking-widest">區間統計</h1>
+                <div class="flex space-x-4 px-2">
+                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-3 border border-white/10">
+                        <div class="text-[10px] text-blue-200 mb-1 tracking-wider uppercase">總收入</div>
+                        <div class="text-xl font-bold" id="stats-total-income">$0</div>
+                    </div>
+                    <div class="flex-1 text-center bg-white/10 backdrop-blur-sm rounded-2xl py-3 border border-white/10">
+                        <div class="text-[10px] text-blue-200 mb-1 tracking-wider uppercase">總支出</div>
+                        <div class="text-xl font-bold" id="stats-total-expense">$0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-5 -mt-8 relative z-10 pb-8 space-y-5">
+                <div class="bg-white p-5 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <div class="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl border border-gray-100 mb-4">
+                        <input type="date" id="stats-start" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                        <span class="text-gray-300 font-bold">~</span>
+                        <input type="date" id="stats-end" class="w-1/2 px-2 py-2 bg-transparent text-gray-700 text-sm font-bold outline-none text-center">
+                    </div>
+                    <button onclick="doStats()" class="w-full py-3.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-2xl font-bold text-sm transition-all tracking-wide">重新計算區間</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-end mb-6">
+                        <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
+                            <span class="w-1.5 h-4 bg-indigo-500 rounded-full mr-2"></span>支出分類排行
+                        </h2>
+                        <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">結餘 <span id="stats-net" class="ml-1">$0</span></div>
+                    </div>
+                    <div id="stats-breakdown" class="space-y-5">
+                        <div class="text-center py-6 text-gray-400 text-sm font-medium">尚無資料</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm mt-5">
+                    <div class="flex justify-between items-end mb-6">
+                        <h2 class="text-sm font-bold text-gray-800 pl-1 flex items-center">
+                            <span class="w-1.5 h-4 bg-teal-500 rounded-full mr-2"></span>收入分類排行
+                        </h2>
+                    </div>
+                    <div id="stats-income-breakdown" class="space-y-5">
+                        <div class="text-center py-6 text-gray-400 text-sm font-medium">尚無資料</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 底部導覽列 ==================== -->
+        <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-[calc(28rem-2.5rem)] bg-white/90 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.08)] rounded-3xl z-40 px-3 py-2 flex justify-between items-center">
+            <button class="nav-btn active" data-target="tab-record" onclick="switchTab('tab-record', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg><span>登帳</span>
+            </button>
+            <button class="nav-btn" data-target="tab-daily" onclick="switchTab('tab-daily', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>每日</span>
+            </button>
+            <button class="nav-btn" data-target="tab-query" onclick="switchTab('tab-query', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>查詢</span>
+            </button>
+            <button class="nav-btn" data-target="tab-stats" onclick="switchTab('tab-stats', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg><span>統計</span>
+            </button>
+        </nav>
+
+        <!-- ==================== 編輯與刪除 Modal ==================== -->
+        <div id="edit-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden flex-col justify-end sm:justify-center items-center pb-0 sm:pb-20">
+            <div class="absolute inset-0" onclick="closeEditModal()"></div>
+            <div class="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="edit-modal-content">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-lg font-bold text-gray-800">編輯紀錄</h3>
+                        <button onclick="closeEditModal()" class="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <input type="hidden" id="edit-id">
+                        <div class="flex space-x-3">
+                            <input type="date" id="edit-date" class="w-1/3 px-2 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-xs font-bold text-gray-600 text-center">
+                            <input type="number" id="edit-amount" class="w-2/3 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-lg font-bold text-gray-700" placeholder="金額">
+                        </div>
+                        <div class="flex space-x-3">
+                            <select id="edit-category" class="w-1/2 px-4 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-600 font-bold text-sm"></select>
+                            <select id="edit-payment" class="w-1/2 px-4 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-xl appearance-none outline-none text-gray-600 font-bold text-sm">
+                                <option value="現金">💵 現金</option>
+                                <option value="刷卡">💳 刷卡</option>
+                                <option value="轉帳">🏦 轉帳</option>
+                                <option value="行動支付">📱 行動支付</option>
+                            </select>
+                        </div>
+                        <input type="text" id="edit-note" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-gray-600 text-sm" placeholder="項目說明 / 備註...">
+                    </div>
+
+                    <div class="mt-6 flex space-x-3">
+                        <button onclick="deleteRecord()" class="w-1/3 py-3.5 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-xl transition-all">刪除</button>
+                        <button onclick="saveEdit()" class="w-2/3 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all">儲存修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript 邏輯 (包含 GAS API 串接) -->
+    <script>
+        // ★★★ 你的 Google Apps Script 專屬 API 網址 ★★★
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx67Tzf_7N3eg4nYTAcOMb6s4v28cMS1qeKJTCXUxW2qAPRfR8E2gN1gA-j1FFmaJOxjw/exec';
+        
+        let records = []; 
+        
+        // Loader 控制
+        function showLoader() { document.getElementById('global-loader').classList.remove('hidden'); }
+        function hideLoader() { document.getElementById('global-loader').classList.add('hidden'); }
+
+        // 產生相容於舊系統的 UUID
+        const generateUUID = () => {
+            return typeof crypto.randomUUID === 'function' 
+                ? crypto.randomUUID() 
+                : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+        };
+
+        const getTodayStr = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
+        const todayStr = getTodayStr();
+
+        const categoryOptions = {
+            expense: ['食', '衣', '住', '行', '育', '樂', '其他'], 
+            income: ['薪資', '房租', '股利', '保險金', '銀行利息', '其他']
+        };
+        const categoryColors = {
+            '食': 'bg-orange-100 text-orange-600', '衣': 'bg-blue-100 text-blue-600',
+            '住': 'bg-teal-100 text-teal-600', '行': 'bg-gray-100 text-gray-600',
+            '育': 'bg-purple-100 text-purple-600', '樂': 'bg-pink-100 text-pink-600',
+            '薪資': 'bg-green-100 text-green-600', '房租': 'bg-indigo-100 text-indigo-600',
+            '股利': 'bg-red-100 text-red-600', '保險金': 'bg-cyan-100 text-cyan-600',
+            '銀行利息': 'bg-emerald-100 text-emerald-600', '其他': 'bg-yellow-100 text-yellow-600'
+        };
+
+        // 初始化日期欄位
+        document.getElementById('date').value = todayStr;
+        document.getElementById('daily-date-picker').value = todayStr;
+        
+        const firstDayStr = `${todayStr.substring(0, 8)}01`;
+        document.getElementById('query-start').value = firstDayStr;
+        document.getElementById('query-end').value = todayStr;
+        document.getElementById('stats-start').value = firstDayStr;
+        document.getElementById('stats-end').value = todayStr;
+
+        const queryCatSelect = document.getElementById('query-category');
+        [...categoryOptions.expense, ...categoryOptions.income].forEach(cat => {
+            if(!Array.from(queryCatSelect.options).some(opt => opt.value === cat)) {
+                queryCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            }
+        });
+
+        // ==========================================
+        // 核心：雲端 API 串接邏輯 (CRUD)
+        // ==========================================
+
+        // 1. 讀取資料 (Read)
+        async function loadDataFromCloud() {
+            showLoader();
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                if(result.status === 'success') {
+                    // 將資料反轉，確保最新紀錄在最上面
+                    records = result.data.reverse();
+                    refreshAllViews();
+                } else {
+                    alert('讀取資料失敗，請重新整理');
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                alert('網路連線發生錯誤！無法載入資料。');
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // 2. 新增紀錄 (Create)
+        document.getElementById('expense-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('amount').value);
+            if (!amount || amount <= 0) return;
+
+            const newRecord = {
+                id: generateUUID(),
+                type: document.querySelector('input[name="type"]:checked').value,
+                dateVal: document.getElementById('date').value,
+                amount: amount,
+                category: document.getElementById('category').value,
+                paymentMethod: document.getElementById('payment-method').value,
+                note: document.getElementById('note').value.trim()
+            };
+            
+            showLoader();
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'add', record: newRecord })
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    records.unshift(newRecord); 
+                    refreshAllViews();
+                    
+                    document.getElementById('amount').value = '';
+                    document.getElementById('note').value = '';
+                    if (navigator.vibrate) navigator.vibrate(50);
+                } else {
+                    alert('儲存失敗：' + result.message);
+                }
+            } catch (error) {
+                console.error("Save Error:", error);
+                alert('網路錯誤，紀錄尚未存入雲端！');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // 3. 修改紀錄 (Update)
+        async function saveEdit() {
+            const id = document.getElementById('edit-id').value;
+            const index = records.findIndex(r => r.id === id);
+            
+            if(index > -1) {
+                // 產生修改後的物件
+                const updatedRecord = {
+                    ...records[index],
+                    dateVal: document.getElementById('edit-date').value,
+                    amount: parseInt(document.getElementById('edit-amount').value),
+                    category: document.getElementById('edit-category').value,
+                    paymentMethod: document.getElementById('edit-payment').value,
+                    note: document.getElementById('edit-note').value.trim()
+                };
+                
+                showLoader();
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'update', record: updatedRecord })
+                    });
+                    const result = await response.json();
+                    
+                    if(result.status === 'success') {
+                        records[index] = updatedRecord; // 更新本地端
+                        refreshAllViews();
+                        closeEditModal();
+                    } else {
+                        alert('更新失敗：' + result.message);
+                    }
+                } catch (error) {
+                    console.error("Update Error:", error);
+                    alert('網路錯誤，修改尚未存入雲端！');
+                } finally {
+                    hideLoader();
+                }
+            }
+        }
+
+        // 4. 刪除紀錄 (Delete)
+        async function deleteRecord() {
+            if(confirm('確定要刪除這筆紀錄嗎？這將會同步從雲端移除。')) {
+                const id = document.getElementById('edit-id').value;
+                
+                showLoader();
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'delete', record: { id: id } })
+                    });
+                    const result = await response.json();
+                    
+                    if(result.status === 'success') {
+                        records = records.filter(r => r.id !== id); // 移除本地端資料
+                        refreshAllViews();
+                        closeEditModal();
+                    } else {
+                        alert('刪除失敗：' + result.message);
+                    }
+                } catch (error) {
+                    console.error("Delete Error:", error);
+                    alert('網路錯誤，尚未從雲端刪除！');
+                } finally {
+                    hideLoader();
+                }
+            }
+        }
+
+        // ====== 畫面更新共用函數 ======
+        function renderRecordHTML(r) {
+            const isInc = r.type === 'income';
+            const sign = isInc ? '+' : '-';
+            const colorClass = categoryColors[r.category] || 'bg-indigo-100 text-indigo-600';
+            const amountColor = isInc ? 'text-teal-600' : 'text-gray-800';
+            const typeLabel = isInc ? '收入' : '支出';
+            const shortDate = r.dateVal.substring(5);
+
+            return `
+                <li onclick="openEditModal('${r.id}')" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50/80 rounded-2xl hover:bg-white hover:scale-[1.01] active:scale-95 border border-gray-100 shadow-sm transition-all mb-3">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[15px] font-bold ${colorClass} shadow-sm">${r.category}</div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-gray-700">${r.category}${typeLabel}</span>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="text-[10px] bg-white border border-gray-200 text-gray-500 px-1.5 py-0.5 rounded-md font-medium shadow-sm">${shortDate}</span>
+                                <span class="text-[10px] bg-indigo-50 border border-indigo-100 text-indigo-500 px-1.5 py-0.5 rounded-md font-medium shadow-sm">${r.paymentMethod}</span>
+                                ${r.note ? `<span class="text-xs text-gray-400 line-clamp-1 ml-1 font-medium">${r.note}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-[17px] font-extrabold ${amountColor} tracking-tight">${sign}$${r.amount.toLocaleString()}</div>
+                </li>
+            `;
+        }
+
+        function refreshAllViews() {
+            let total = records.reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
+            document.getElementById('today-total').textContent = `$${total.toLocaleString()}`;
+
+            const recentList = document.getElementById('recent-list');
+            recentList.innerHTML = records.slice(0, 3).map(renderRecordHTML).join('') || `<li class="text-center py-6 text-gray-400 text-sm font-medium">尚未新增紀錄</li>`;
+
+            updateDailyView();
+            doQuery();
+            doStats();
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            btnElement.classList.add('active');
+            refreshAllViews();
+        }
+
+        const categoryInput = document.getElementById('category');
+        document.querySelectorAll('input[name="type"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const type = document.querySelector('input[name="type"]:checked').value;
+                categoryInput.innerHTML = categoryOptions[type].map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            });
+        });
+        document.querySelector('input[name="type"]:checked').dispatchEvent(new Event('change'));
+
+        // ====== 編輯/刪除 Modal UI 控制 ======
+        const modal = document.getElementById('edit-modal');
+        const modalContent = document.getElementById('edit-modal-content');
+
+        function openEditModal(id) {
+            const record = records.find(r => r.id === id);
+            if(!record) return;
+
+            document.getElementById('edit-id').value = record.id;
+            document.getElementById('edit-date').value = record.dateVal;
+            document.getElementById('edit-amount').value = record.amount;
+            document.getElementById('edit-note').value = record.note;
+            document.getElementById('edit-payment').value = record.paymentMethod;
+            
+            const editCatSelect = document.getElementById('edit-category');
+            editCatSelect.innerHTML = categoryOptions[record.type].map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            editCatSelect.value = record.category;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => { modalContent.classList.remove('translate-y-full'); }, 10);
+        }
+
+        function closeEditModal() {
+            modalContent.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // ====== 其他分頁邏輯 ======
+        const dailyDatePicker = document.getElementById('daily-date-picker');
+        dailyDatePicker.addEventListener('change', updateDailyView);
+
+        function changeDailyDate(offset) {
+            const d = new Date(dailyDatePicker.value);
+            d.setDate(d.getDate() + offset);
+            dailyDatePicker.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            updateDailyView();
+        }
+
+        function updateDailyView() {
+            const targetDate = dailyDatePicker.value;
+            const dailyRecords = records.filter(r => r.dateVal === targetDate);
+            let income = 0, expense = 0;
+            const html = dailyRecords.map(r => {
+                if(r.type === 'income') income += r.amount; else expense += r.amount;
+                return renderRecordHTML(r);
+            }).join('');
+            document.getElementById('daily-income').textContent = `$${income.toLocaleString()}`;
+            document.getElementById('daily-expense').textContent = `$${expense.toLocaleString()}`;
+            document.getElementById('daily-list').innerHTML = html || `<div class="text-center py-10 text-gray-400 text-sm font-medium">這天沒有記帳喔</div>`;
+        }
+
+        function doQuery() {
+            const sDate = document.getElementById('query-start').value;
+            const eDate = document.getElementById('query-end').value;
+            const cat = document.getElementById('query-category').value;
+            const pay = document.getElementById('query-payment').value;
+            const noteKW = document.getElementById('query-note').value.trim().toLowerCase();
+            
+            const filtered = records.filter(r => {
+                const passDate = (!sDate || r.dateVal >= sDate) && (!eDate || r.dateVal <= eDate);
+                const passCat = (cat === 'all' || r.category === cat);
+                const passPay = (pay === 'all' || r.paymentMethod === pay);
+                const passNote = (!noteKW || (r.note && r.note.toLowerCase().includes(noteKW)));
+                return passDate && passCat && passPay && passNote;
+            });
+            
+            document.getElementById('query-result-text').textContent = `共 ${filtered.length} 筆`;
+            document.getElementById('query-list').innerHTML = filtered.map(renderRecordHTML).join('') || `<div class="text-center py-6 text-gray-400 text-sm font-medium">沒有符合條件的紀錄</div>`;
+        }
+
+        function doStats() {
+            const sDate = document.getElementById('stats-start').value;
+            const eDate = document.getElementById('stats-end').value;
+            const filtered = records.filter(r => (!sDate || r.dateVal >= sDate) && (!eDate || r.dateVal <= eDate));
+            let inc = 0, exp = 0;
+            const expenseCats = {}; 
+            const incomeCats = {};
+
+            filtered.forEach(r => {
+                if (r.type === 'income') {
+                    inc += r.amount;
+                    incomeCats[r.category] = (incomeCats[r.category] || 0) + r.amount;
+                } else { 
+                    exp += r.amount; 
+                    expenseCats[r.category] = (expenseCats[r.category] || 0) + r.amount; 
+                }
+            });
+            document.getElementById('stats-total-income').textContent = `$${inc.toLocaleString()}`;
+            document.getElementById('stats-total-expense').textContent = `$${exp.toLocaleString()}`;
+            document.getElementById('stats-net').textContent = `$${(inc - exp).toLocaleString()}`;
+            
+            const renderBreakdown = (cats, total, emptyMsg) => {
+                return Object.entries(cats).sort((a, b) => b[1] - a[1]).map(([cat, amount]) => {
+                    const percent = total > 0 ? Math.round((amount / total) * 100) : 0;
+                    const colorClass = categoryColors[cat] || 'bg-indigo-100 text-indigo-600';
+                    const bgColor = colorClass.split(' ')[0].replace('bg-', 'bg-').replace('-100', '-500'); 
+                    return `
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-2"><span class="font-extrabold text-gray-700">${cat} <span class="text-gray-400 font-medium ml-1 text-xs">${percent}%</span></span><span class="font-bold text-gray-800">$${amount.toLocaleString()}</span></div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden"><div class="${bgColor} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div></div>
+                    </div>`;
+                }).join('') || `<div class="text-center py-6 text-gray-400 text-sm font-medium">${emptyMsg}</div>`;
+            };
+
+            document.getElementById('stats-breakdown').innerHTML = renderBreakdown(expenseCats, exp, '該區間無支出資料');
+            document.getElementById('stats-income-breakdown').innerHTML = renderBreakdown(incomeCats, inc, '該區間無收入資料');
+        }
+
+        // ==========================================
+        // 程式啟動起點：當網頁載入完成，向 Google Sheet 要資料
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDataFromCloud();
+        });
+
+    </script>
+</body>
+</html>
