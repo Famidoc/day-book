@@ -47,14 +47,14 @@
         <div class="text-indigo-600 font-extrabold tracking-widest text-lg animate-pulse">雲端同步中...</div>
     </div>
 
-    <main class="w-full max-w-md bg-[#f8fafc] shadow-2xl relative pb-32 min-h-screen overflow-x-hidden">
+    <main class="w-full max-w-xl bg-[#f8fafc] shadow-2xl relative pb-32 min-h-screen overflow-x-hidden">
         
         <!-- ==================== 分頁 1: 登帳 ==================== -->
         <div id="tab-record" class="tab-content block">
             <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 px-6 pt-8 pb-12 text-center rounded-b-[2.5rem] shadow-lg shadow-purple-200/50">
                 <h1 class="text-xl font-bold text-white/90 tracking-widest">日常記帳</h1>
                 <div class="mt-2 text-5xl font-extrabold text-white tracking-tight drop-shadow-md" id="today-total">$0</div>
-                <div class="text-sm text-white/90 mt-2 font-medium tracking-wider">目前總結餘</div>
+                <div class="text-sm text-white/90 mt-2 font-medium tracking-wider">本月總結餘</div>
             </div>
 
             <div class="px-5 -mt-6 relative z-10 space-y-6">
@@ -240,7 +240,7 @@
         </div>
 
         <!-- ==================== 底部導覽列 ==================== -->
-        <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(28rem-2rem)] bg-white/95 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.12)] rounded-3xl z-40 px-2 py-2 flex justify-between items-center">
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(36rem-2rem)] bg-white/95 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.12)] rounded-3xl z-40 px-2 py-2 flex justify-between items-center">
             <button class="nav-btn active" data-target="tab-record" onclick="switchTab('tab-record', this)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg><span>登帳</span>
             </button>
@@ -254,6 +254,10 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg><span>統計</span>
             </button>
         </nav>
+
+        <div class="fixed bottom-1 w-full text-center text-[11px] text-gray-400 z-50 pointer-events-none font-medium tracking-wide">
+            @2026 by Famidoc Chang & Gemini 3.1 pro
+        </div>
 
         <!-- ==================== 編輯與刪除 Modal ==================== -->
         <div id="edit-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex-col justify-end sm:justify-center items-center pb-0 sm:pb-20">
@@ -363,21 +367,30 @@
             }
         });
 
-        // 1. 讀取資料 (Read)
         async function loadDataFromCloud() {
-            showLoader();
+            // 1. 先嘗試從 LocalStorage 讀取快取，讓畫面瞬間渲染
+            const cachedData = localStorage.getItem('records_cache');
+            if (cachedData) {
+                records = JSON.parse(cachedData);
+                refreshAllViews();
+            } else {
+                showLoader(); // 只有完全沒快取（第一次開啟）時才顯示全螢幕轉圈圈
+            }
+        
             try {
                 const response = await fetch(API_URL);
                 const result = await response.json();
                 if(result.status === 'success') {
                     records = result.data.reverse();
+                    // 2. 將最新資料存入快取
+                    localStorage.setItem('records_cache', JSON.stringify(records));
                     refreshAllViews();
                 } else {
-                    alert('讀取資料失敗，請重新整理');
+                    console.error('讀取資料失敗');
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                alert('網路連線發生錯誤！無法載入資料。');
+                if (!cachedData) alert('網路連線發生錯誤！無法載入資料。');
             } finally {
                 hideLoader();
             }
@@ -520,12 +533,19 @@
         }
 
         function refreshAllViews() {
-            let total = records.reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
+            // 取得當前月份字串，例如 "2026-03"
+            const currentMonth = todayStr.substring(0, 7); 
+            
+            // 只篩選本月資料來計算結餘
+            let total = records
+                .filter(r => r.dateVal.startsWith(currentMonth))
+                .reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
+                
             document.getElementById('today-total').textContent = `$${total.toLocaleString()}`;
-
+        
             const recentList = document.getElementById('recent-list');
             recentList.innerHTML = records.slice(0, 3).map(renderRecordHTML).join('') || `<li class="text-center py-8 text-gray-400 text-base font-medium">尚未新增紀錄</li>`;
-
+        
             updateDailyView();
             doQuery();
             doStats();
