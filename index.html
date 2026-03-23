@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>多功能記帳本</title>
     
-    <!-- PWA (Progressive Web App) 專用設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -13,7 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="多功能記帳本">
 
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 隱藏數字輸入框的上下箭頭 */
@@ -41,7 +39,6 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen flex justify-center selection:bg-indigo-100 selection:text-indigo-900">
 
-    <!-- 全域載入畫面 (Loading Overlay) -->
     <div id="global-loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-100 border-t-indigo-600 mb-4 shadow-lg shadow-indigo-200"></div>
         <div class="text-indigo-600 font-extrabold tracking-widest text-lg animate-pulse">雲端同步中...</div>
@@ -49,7 +46,6 @@
 
     <main class="w-full max-w-xl bg-[#f8fafc] shadow-2xl relative pb-32 min-h-screen overflow-x-hidden">
         
-        <!-- ==================== 分頁 1: 登帳 ==================== -->
         <div id="tab-record" class="tab-content block">
             <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 px-6 pt-8 pb-12 text-center rounded-b-[2.5rem] shadow-lg shadow-purple-200/50">
                 <h1 class="text-xl font-bold text-white/90 tracking-widest">日常記帳</h1>
@@ -70,7 +66,6 @@
                         </label>
                     </div>
 
-                    <!-- 寬度比例調整：日期 w-[45%]，金額 w-[55%] -->
                     <div class="flex space-x-3">
                         <div class="w-[45%]">
                             <input type="date" id="date" required class="w-full px-1 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-base font-bold text-gray-700 text-center">
@@ -117,7 +112,6 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁 2: 每日帳 ==================== -->
         <div id="tab-daily" class="tab-content hidden">
             <div class="bg-gradient-to-br from-teal-400 to-emerald-500 px-6 pt-8 pb-12 rounded-b-[2.5rem] shadow-lg shadow-teal-200/50">
                 <h1 class="text-xl font-bold text-white text-center tracking-widest mb-4">每日明細</h1>
@@ -147,7 +141,6 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁 3: 查詢 ==================== -->
         <div id="tab-query" class="tab-content hidden">
             <div class="bg-gradient-to-br from-blue-500 to-cyan-400 px-6 pt-8 pb-10 rounded-b-[2.5rem] shadow-lg shadow-blue-200/50 text-white">
                 <h1 class="text-xl font-bold text-center tracking-widest">查詢帳目</h1>
@@ -188,7 +181,6 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁 4: 統計 ==================== -->
         <div id="tab-stats" class="tab-content hidden">
             <div class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-600 px-6 pt-8 pb-[4.5rem] text-white rounded-b-[2.5rem] shadow-lg shadow-blue-200/50">
                 <h1 class="text-xl font-bold text-center mb-4 tracking-widest">區間統計</h1>
@@ -239,27 +231,6 @@
             </div>
         </div>
 
-        <!-- ==================== 底部導覽列 ==================== -->
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(36rem-2rem)] bg-white/95 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.12)] rounded-3xl z-40 px-2 py-2 flex justify-between items-center">
-            <button class="nav-btn active" data-target="tab-record" onclick="switchTab('tab-record', this)">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg><span>登帳</span>
-            </button>
-            <button class="nav-btn" data-target="tab-daily" onclick="switchTab('tab-daily', this)">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>每日</span>
-            </button>
-            <button class="nav-btn" data-target="tab-query" onclick="switchTab('tab-query', this)">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>查詢</span>
-            </button>
-            <button class="nav-btn" data-target="tab-stats" onclick="switchTab('tab-stats', this)">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg><span>統計</span>
-            </button>
-        </nav>
-
-        <div class="fixed bottom-1 w-full text-center text-[11px] text-gray-400 z-50 pointer-events-none font-medium tracking-wide">
-            @2026 by Famidoc Chang & Gemini 3.1 pro
-        </div>
-
-        <!-- ==================== 編輯與刪除 Modal ==================== -->
         <div id="edit-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex-col justify-end sm:justify-center items-center pb-0 sm:pb-20">
             <div class="absolute inset-0" onclick="closeEditModal()"></div>
             <div class="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="edit-modal-content">
@@ -274,7 +245,6 @@
                     <div class="space-y-5">
                         <input type="hidden" id="edit-id">
                         
-                        <!-- 寬度比例同步調整：日期 w-[45%]，金額 w-[55%] -->
                         <div class="flex space-x-3">
                             <input type="date" id="edit-date" class="w-[45%] px-1 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-base font-bold text-gray-800 text-center">
                             <input type="number" id="edit-amount" class="w-[55%] px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-2xl font-extrabold text-gray-800" placeholder="金額">
@@ -299,9 +269,49 @@
             </div>
         </div>
 
+        <div id="setup-modal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[110] hidden flex-col justify-center items-center px-4">
+            <div class="bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8 transform transition-transform duration-300 scale-95" id="setup-modal-content">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800">連結您的雲端資料庫</h3>
+                    <p class="text-sm text-gray-500 mt-2">請貼上您部署 Google Apps Script 後取得的「網頁應用程式網址」</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <input type="text" id="user-api-input" class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-gray-800 text-sm font-medium" placeholder="https://script.google.com/macros/s/...">
+                    <button onclick="saveApiUrl()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded-xl shadow-md transition-all">儲存並開始使用</button>
+                    <button onclick="resetApiUrl()" class="w-full py-2 text-gray-400 hover:text-red-500 text-sm font-bold transition-all">清除設定 (重置 App)</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- JavaScript 邏輯 (包含 GAS API 串接與 PWA 註冊) -->
+    <button onclick="openSetupModal()" class="fixed top-6 right-6 z-50 p-3 bg-white/20 backdrop-blur-md border border-gray-200 text-gray-600 rounded-full shadow-lg hover:scale-110 transition-transform bg-white/50">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    </button>
+
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(36rem-2rem)] bg-white/95 backdrop-blur-lg border border-gray-100 shadow-[0_10px_40px_rgb(0,0,0,0.12)] rounded-3xl z-40 px-2 py-2 flex justify-between items-center">
+        <button class="nav-btn active" data-target="tab-record" onclick="switchTab('tab-record', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg><span>登帳</span>
+        </button>
+        <button class="nav-btn" data-target="tab-daily" onclick="switchTab('tab-daily', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>每日</span>
+        </button>
+        <button class="nav-btn" data-target="tab-query" onclick="switchTab('tab-query', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>查詢</span>
+        </button>
+        <button class="nav-btn" data-target="tab-stats" onclick="switchTab('tab-stats', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg><span>統計</span>
+        </button>
+    </nav>
+
+    <div class="fixed bottom-1 w-full text-center text-[11px] text-gray-400 z-50 pointer-events-none font-medium tracking-wide">
+        @2026 by Famidoc Chang & Gemini 3.1 pro
+    </div>
+
     <script>
         // PWA Service Worker 註冊
         if ('serviceWorker' in navigator) {
@@ -314,8 +324,9 @@
             });
         }
 
-        // ★★★ 你的 Google Apps Script 專屬 API 網址 ★★★
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx67Tzf_7N3eg4nYTAcOMb6s4v28cMS1qeKJTCXUxW2qAPRfR8E2gN1gA-j1FFmaJOxjw/exec';
+        // ★★★ 改為動態取得 API 網址 ★★★
+        let API_URL = localStorage.getItem('user_api_url') || '';
+        const REQUIRED_BACKEND_VERSION = "1.0.0"; // 前端要求的最低後端版本
         
         let records = []; 
         
@@ -367,30 +378,76 @@
             }
         });
 
+        // --- 設定 Modal 控制邏輯 ---
+        function openSetupModal() {
+            document.getElementById('user-api-input').value = API_URL;
+            document.getElementById('setup-modal').classList.remove('hidden');
+            document.getElementById('setup-modal').classList.add('flex');
+            setTimeout(() => { 
+                document.getElementById('setup-modal-content').classList.remove('scale-95'); 
+                document.getElementById('setup-modal-content').classList.add('scale-100'); 
+            }, 10);
+        }
+
+        function saveApiUrl() {
+            const inputUrl = document.getElementById('user-api-input').value.trim();
+            if(!inputUrl.startsWith('https://script.google.com/')) {
+                alert('請輸入正確的 Google Apps Script 網址！');
+                return;
+            }
+            API_URL = inputUrl;
+            localStorage.setItem('user_api_url', API_URL);
+            document.getElementById('setup-modal').classList.remove('flex');
+            document.getElementById('setup-modal').classList.add('hidden');
+            loadDataFromCloud(); // 儲存後立即載入資料
+        }
+
+        function resetApiUrl() {
+            if(confirm('確定要清除設定嗎？這將清空快取資料，您需要重新輸入 API 網址。')) {
+                localStorage.removeItem('user_api_url');
+                localStorage.removeItem('records_cache');
+                location.reload(); // 重新載入網頁
+            }
+        }
+
+        // --- 載入資料邏輯 (含版本檢查) ---
         async function loadDataFromCloud() {
-            // 1. 先嘗試從 LocalStorage 讀取快取，讓畫面瞬間渲染
+            if (!API_URL) {
+                openSetupModal();
+                return;
+            }
+
             const cachedData = localStorage.getItem('records_cache');
             if (cachedData) {
                 records = JSON.parse(cachedData);
                 refreshAllViews();
             } else {
-                showLoader(); // 只有完全沒快取（第一次開啟）時才顯示全螢幕轉圈圈
+                showLoader();
             }
         
             try {
                 const response = await fetch(API_URL);
                 const result = await response.json();
                 if(result.status === 'success') {
+                    // ★ 版本檢查邏輯 ★
+                    if (result.version && result.version !== REQUIRED_BACKEND_VERSION) {
+                        alert(`⚠️ 版本提醒：\n偵測到您的 Google Sheet 後端腳本需要更新！\n前端版本支援 ${REQUIRED_BACKEND_VERSION}，但您的後端是 ${result.version || '舊版'}。\n請前往教學文章重新複製最新的後端代碼以防功能異常。`);
+                    }
+
                     records = result.data.reverse();
-                    // 2. 將最新資料存入快取
                     localStorage.setItem('records_cache', JSON.stringify(records));
                     refreshAllViews();
                 } else {
                     console.error('讀取資料失敗');
+                    alert('讀取失敗，請確認您的 API 網址是否正確且已設定任何人皆可存取。');
+                    openSetupModal(); 
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                if (!cachedData) alert('網路連線發生錯誤！無法載入資料。');
+                if (!cachedData) {
+                    alert('無法連線到資料庫！請確認網址是否正確。');
+                    openSetupModal();
+                }
             } finally {
                 hideLoader();
             }
@@ -533,10 +590,8 @@
         }
 
         function refreshAllViews() {
-            // 取得當前月份字串，例如 "2026-03"
             const currentMonth = todayStr.substring(0, 7); 
             
-            // 只篩選本月資料來計算結餘
             let total = records
                 .filter(r => r.dateVal.startsWith(currentMonth))
                 .reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
