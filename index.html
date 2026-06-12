@@ -517,11 +517,32 @@
 
     <!-- 邏輯腳本 -->
     <script>
-        // PWA Service Worker 註冊
+        // PWA Service Worker 註冊與更新偵測
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(reg => {
                     console.log('Service Worker 註冊成功！', reg);
+                    
+                    // 監聽是否有更新的版本正在安裝
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        if (installingWorker) {
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        // 偵測到新版本已下載完成並準備啟用，提示使用者並自動重整
+                                        console.log('有新的網頁版本已下載，即將自動更新...');
+                                        if (typeof showToast === 'function') {
+                                            showToast('偵測到新版功能，正在更新排版中...', 2000);
+                                        }
+                                        setTimeout(() => {
+                                            location.reload();
+                                        }, 1500);
+                                    }
+                                }
+                            };
+                        }
+                    };
                 }).catch(err => {
                     console.log('Service Worker 註冊失敗', err);
                 });
