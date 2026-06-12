@@ -85,7 +85,10 @@
                 <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 </div>
-                <span class="text-lg font-black tracking-wider text-slate-850 dark:text-slate-100">極簡記帳 <span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">Day Book</span></span>
+                <div class="flex flex-col">
+                    <span class="text-base font-black tracking-wider text-slate-850 dark:text-slate-100 leading-tight">極簡記帳</span>
+                    <span class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 leading-none mt-0.5">Day Book</span>
+                </div>
             </div>
             
             <div class="flex items-center space-x-2">
@@ -761,8 +764,8 @@
             barcodeContent.classList.remove('scale-100');
             barcodeContent.classList.add('scale-95');
             setTimeout(() => {
-                document.getElementById('barcode-modal').classList.add('hidden');
-                document.getElementById('barcode-modal').classList.remove('flex');
+                barcodeModal.classList.add('hidden');
+                barcodeModal.classList.remove('flex');
             }, 300);
         }
 
@@ -800,7 +803,7 @@
             
             if (!API_URL) {
                 statusEl.innerHTML = `
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40 whitespace-nowrap">
                         <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500 animate-pulse"></span>未連接
                     </span>`;
                 return;
@@ -809,29 +812,29 @@
             if (pendingSync.length > 0) {
                 if (!navigator.onLine) {
                     statusEl.innerHTML = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40 whitespace-nowrap">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-400"></span>離線待同步 (${pendingSync.length})
                         </span>`;
                 } else if (isSyncing) {
                     statusEl.innerHTML = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/50 whitespace-nowrap">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-500 animate-ping"></span>同步中 (${pendingSync.length})
                         </span>`;
                 } else {
                     statusEl.innerHTML = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40 whitespace-nowrap">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-400 animate-pulse"></span>待同步 (${pendingSync.length})
                         </span>`;
                 }
             } else {
                 if (!navigator.onLine) {
                     statusEl.innerHTML = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-100 dark:border-slate-705">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-100 dark:border-slate-705 whitespace-nowrap">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-slate-400"></span>離線
                         </span>`;
                 } else {
                     statusEl.innerHTML = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40 whitespace-nowrap">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span>已同步
                         </span>`;
                 }
