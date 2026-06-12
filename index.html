@@ -27,9 +27,10 @@
         }
     </script>
     
-    <!-- Google Fonts & Chart.js -->
+    <!-- Google Fonts, Chart.js & JsBarcode -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
     <style>
         /* 隱藏數字輸入框的上下箭頭 */
@@ -90,6 +91,13 @@
             <div class="flex items-center space-x-2">
                 <div id="sync-status"></div>
                 
+                <!-- 載具條碼按鈕 -->
+                <button onclick="openBarcodeModal()" class="p-2.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-50 dark:bg-slate-800 rounded-xl transition-all" title="電子發票載具">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h2v14H3V5zm4 0h1v14H7V5zm3 0h3v14h-3V5zm5 0h2v14h-2V5zm4 0h1v14h-1V5z" />
+                    </svg>
+                </button>
+
                 <!-- 主題切換按鈕 -->
                 <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-50 dark:bg-slate-800 rounded-xl transition-all">
                     <!-- 太陽（深色模式下顯示） -->
@@ -175,8 +183,13 @@
                     </div>
 
                     <!-- 項目說明/備註 -->
-                    <div>
-                        <input type="text" id="note" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all text-slate-700 dark:text-slate-200 text-base font-medium placeholder-slate-400 dark:placeholder-slate-500" placeholder="項目說明 / 備註...">
+                    <div class="flex space-x-3">
+                        <input type="text" id="note" class="flex-1 px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all text-slate-700 dark:text-slate-200 text-base font-medium placeholder-slate-400 dark:placeholder-slate-500" placeholder="項目說明 / 備註...">
+                        <button type="button" id="voice-btn" onclick="startVoiceRecognition()" class="px-5 py-4 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/50 flex items-center justify-center active:scale-95 transition-all" title="語音智慧記帳">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a6.002 6.002 0 005.993-5.75m-11.986 0A6.002 6.002 0 0012 18.5m0 0V21m0-2.5A3.5 3.5 0 0015.5 15V6.5a3.5 3.5 0 10-7 0V15A3.5 3.5 0 0012 18.5z" />
+                            </svg>
+                        </button>
                     </div>
 
                     <button type="submit" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-750 hover:to-purple-750 text-white text-lg font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-500/10 active:scale-[0.98] transition-all tracking-wider">
@@ -383,19 +396,95 @@
 
         <!-- 連線設定 Modal -->
         <div id="setup-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden flex-col justify-center items-center px-4">
-            <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] shadow-2xl p-8 transform transition-transform duration-300 scale-95" id="setup-modal-content">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] shadow-2xl p-8 transform transition-transform duration-300 scale-95 relative" id="setup-modal-content">
+                <!-- 關閉設定按鈕 (只有已設定 API 時顯示) -->
+                <button id="close-setup-btn" onclick="closeSetupModal()" class="absolute right-6 top-6 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-full transition-all hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-850 dark:text-slate-100">連結您的雲端資料庫</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-450 mt-2">請貼上您部署 Google Apps Script 後取得的「網頁應用程式網址」</p>
+                    <h3 class="text-xl font-bold text-slate-850 dark:text-slate-100">系統設定</h3>
                 </div>
                 
-                <div class="space-y-4">
-                    <input type="text" id="user-api-input" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-850 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-850 dark:text-slate-200 text-sm font-medium" placeholder="https://script.google.com/macros/s/...">
-                    <button onclick="saveApiUrl()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-bold rounded-xl shadow-md transition-all">儲存並開始使用</button>
-                    <button onclick="resetApiUrl()" class="w-full py-2.5 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 text-xs font-bold transition-all">清除設定 (重置 App)</button>
+                <div class="space-y-5">
+                    <div>
+                        <span class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider">1. 連結您的雲端資料庫</span>
+                        <input type="text" id="user-api-input" class="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-850 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-850 dark:text-slate-200 text-sm font-medium" placeholder="https://script.google.com/macros/s/...">
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">請貼上部署 Google Apps Script 後取得的「網頁應用程式網址」</p>
+                    </div>
+                    
+                    <div>
+                        <span class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider">2. 電子發票載具條碼 (選填)</span>
+                        <input type="text" id="user-carrier-input" class="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-850 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-850 dark:text-slate-200 text-sm font-medium" placeholder="例如: /ABC1234">
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">首字元需為斜線 「/」，總長度為 8 碼半形大寫英數字</p>
+                    </div>
+                    
+                    <div class="pt-2 space-y-3">
+                        <button onclick="saveApiUrl()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-bold rounded-xl shadow-md transition-all">儲存並開始使用</button>
+                        <button onclick="resetApiUrl()" class="w-full py-2.5 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 text-xs font-bold transition-all">清除設定 (重置 App)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手機載具 Modal -->
+        <div id="barcode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] hidden flex-col justify-center items-center px-4">
+            <div class="absolute inset-0" onclick="closeBarcodeModal()"></div>
+            <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 relative transform transition-transform duration-300 scale-95" id="barcode-modal-content">
+                <div class="text-center relative">
+                    <!-- 關閉按鈕 -->
+                    <button onclick="closeBarcodeModal()" class="absolute right-0 top-0 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-full transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    
+                    <h3 class="text-lg font-black text-slate-850 dark:text-slate-100 mt-2 mb-6">電子發票載具</h3>
+                    
+                    <!-- 載具卡片 (黑白色高對比，方便掃描槍) -->
+                    <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shadow-inner mb-6">
+                        <svg id="carrier-barcode-svg" class="mx-auto max-w-full"></svg>
+                    </div>
+
+                    <!-- 載具文字與複製按鈕 -->
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <span id="barcode-text" class="text-base font-black tracking-widest text-slate-850 dark:text-slate-200 select-all">/ABC1234</span>
+                        <button onclick="copyBarcode()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 flex items-center gap-1 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm active:scale-95 transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 002-2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            複製
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 語音記帳 Modal -->
+        <div id="voice-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] hidden flex-col justify-center items-center px-4">
+            <div class="absolute inset-0" onclick="stopVoiceRecognition()"></div>
+            <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 transform transition-transform duration-300 scale-95 relative" id="voice-modal-content">
+                <div class="text-center">
+                    <h3 class="text-lg font-black text-slate-850 dark:text-slate-100 mb-2">語音智慧記帳</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mb-6">請用簡單的話說出項目和金額</p>
+                    
+                    <!-- 麥克風動畫效果 -->
+                    <div class="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping"></div>
+                        <div class="absolute inset-2 bg-indigo-500/30 rounded-full animate-pulse"></div>
+                        <div class="relative w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a6.002 6.002 0 005.993-5.75m-11.986 0A6.002 6.002 0 0012 18.5m0 0V21m0-2.5A3.5 3.5 0 0015.5 15V6.5a3.5 3.5 0 10-7 0V15A3.5 3.5 0 0012 18.5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- 狀態與辨識內容 -->
+                    <div id="voice-status" class="text-base font-bold text-indigo-600 dark:text-indigo-400 mb-2">正在聆聽中...</div>
+                    <div id="voice-transcript" class="text-sm italic text-slate-500 dark:text-slate-400 min-h-[3rem] px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 rounded-2xl mb-6 flex items-center justify-center">「 例如說：早餐 120 元 」</div>
+                    
+                    <button onclick="stopVoiceRecognition()" class="w-full py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-all">
+                        取消
+                    </button>
                 </div>
             </div>
         </div>
@@ -438,10 +527,12 @@
 
         // --- 全局狀態 ---
         let API_URL = localStorage.getItem('user_api_url') || '';
+        let CARRIER_CODE = localStorage.getItem('user_carrier_code') || '';
         const REQUIRED_BACKEND_VERSION = "1.0.0";
         let records = JSON.parse(localStorage.getItem('records_cache')) || [];
         let pendingSync = JSON.parse(localStorage.getItem('pending_sync_queue')) || [];
         let isSyncing = false;
+        let recognition = null;
         
         let selectedCategory = '';
         let selectedPaymentMethod = '現金';
@@ -563,6 +654,15 @@
         // --- 連線設定 Modal ---
         function openSetupModal() {
             document.getElementById('user-api-input').value = API_URL;
+            document.getElementById('user-carrier-input').value = CARRIER_CODE;
+            
+            const closeBtn = document.getElementById('close-setup-btn');
+            if (API_URL) {
+                closeBtn.classList.remove('hidden');
+            } else {
+                closeBtn.classList.add('hidden');
+            }
+
             document.getElementById('setup-modal').classList.remove('hidden');
             document.getElementById('setup-modal').classList.add('flex');
             setTimeout(() => { 
@@ -571,26 +671,126 @@
             }, 10);
         }
 
+        function closeSetupModal() {
+            if (!API_URL) return; // 強制設定 API_URL
+            const modalContent = document.getElementById('setup-modal-content');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('setup-modal').classList.add('hidden');
+                document.getElementById('setup-modal').classList.remove('flex');
+            }, 300);
+        }
+
         function saveApiUrl() {
             const inputUrl = document.getElementById('user-api-input').value.trim();
+            const inputCarrier = document.getElementById('user-carrier-input').value.trim();
+
             if(!inputUrl.startsWith('https://script.google.com/')) {
                 alert('請輸入正確的 Google Apps Script 網址！');
                 return;
             }
+            
+            // 驗證載具格式 (如果填寫了)
+            if (inputCarrier && !/^\/[A-Z0-9.+-]{7}$/.test(inputCarrier)) {
+                alert('載具格式錯誤！應為 / 加上 7 碼大寫英數字或符號。');
+                return;
+            }
+
             API_URL = inputUrl;
             localStorage.setItem('user_api_url', API_URL);
+
+            CARRIER_CODE = inputCarrier;
+            localStorage.setItem('user_carrier_code', CARRIER_CODE);
+
             document.getElementById('setup-modal').classList.remove('flex');
             document.getElementById('setup-modal').classList.add('hidden');
             loadDataFromCloud();
+            showToast('設定已儲存！');
         }
 
         function resetApiUrl() {
             if(confirm('確定要清除設定嗎？這將清空快取資料，您需要重新輸入 API 網址。')) {
                 localStorage.removeItem('user_api_url');
+                localStorage.removeItem('user_carrier_code');
                 localStorage.removeItem('records_cache');
                 localStorage.removeItem('pending_sync_queue');
                 location.reload();
             }
+        }
+
+        // --- 手機載具 Modal 邏輯 ---
+        function openBarcodeModal() {
+            if (!CARRIER_CODE) {
+                alert('您尚未設定發票載具，請先在「系統設定」中輸入您的載具。');
+                openSetupModal();
+                return;
+            }
+            
+            document.getElementById('barcode-text').textContent = CARRIER_CODE;
+            
+            const barcodeModal = document.getElementById('barcode-modal');
+            const barcodeContent = document.getElementById('barcode-modal-content');
+            
+            barcodeModal.classList.remove('hidden');
+            barcodeModal.classList.add('flex');
+            
+            // 渲染條碼
+            try {
+                JsBarcode("#carrier-barcode-svg", CARRIER_CODE, {
+                    format: "CODE128",
+                    width: 2.2,
+                    height: 85,
+                    displayValue: false, // 隱藏原本文字，用我們自訂的放大版
+                    margin: 0,
+                    background: "#ffffff",
+                    lineColor: "#000000"
+                });
+            } catch (err) {
+                console.error("條碼生成失敗：", err);
+            }
+            
+            setTimeout(() => { 
+                barcodeContent.classList.remove('scale-95'); 
+                barcodeContent.classList.add('scale-100'); 
+            }, 10);
+        }
+
+        function closeBarcodeModal() {
+            const barcodeContent = document.getElementById('barcode-modal-content');
+            barcodeContent.classList.remove('scale-100');
+            barcodeContent.classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('barcode-modal').classList.add('hidden');
+                document.getElementById('barcode-modal').classList.remove('flex');
+            }, 300);
+        }
+
+        function copyBarcode() {
+            navigator.clipboard.writeText(CARRIER_CODE).then(() => {
+                showToast('載具條碼已複製！');
+            }).catch(err => {
+                alert('複製失敗，請手動複製！');
+            });
+        }
+
+        // --- 全局自訂 Toast 通知 ---
+        function showToast(message, duration = 3000) {
+            let toast = document.getElementById('custom-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'custom-toast';
+                toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3.5 bg-slate-900/90 dark:bg-slate-100/90 text-white dark:text-slate-900 text-sm font-bold rounded-2xl shadow-xl backdrop-blur-sm transition-all duration-300 opacity-0 translate-y-2 pointer-events-none z-[200] flex items-center space-x-2';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-1', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-1', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, duration);
         }
 
         // --- 連線與同步指示燈 UI ---
@@ -1205,6 +1405,286 @@
                     }
                 }
             });
+        }
+
+        // ==========================================
+        // 🎙️ 語音記帳與智慧解析邏輯
+        // ==========================================
+        function startVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('您的瀏覽器不支援 Web Speech API 語音辨識。請使用 Chrome 或 Safari 瀏覽器。');
+                return;
+            }
+
+            const voiceModal = document.getElementById('voice-modal');
+            const voiceContent = document.getElementById('voice-modal-content');
+            const statusEl = document.getElementById('voice-status');
+            const transcriptEl = document.getElementById('voice-transcript');
+
+            statusEl.textContent = '正在啟動麥克風...';
+            statusEl.className = 'text-base font-bold text-indigo-600 dark:text-indigo-400 mb-2';
+            transcriptEl.textContent = '「 例如說：早餐 120 元 」';
+            transcriptEl.className = 'text-sm italic text-slate-500 dark:text-slate-400 min-h-[3rem] px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 rounded-2xl mb-6 flex items-center justify-center';
+
+            voiceModal.classList.remove('hidden');
+            voiceModal.classList.add('flex');
+            setTimeout(() => {
+                voiceContent.classList.remove('scale-95');
+                voiceContent.classList.add('scale-100');
+            }, 10);
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-TW';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                statusEl.textContent = '正在聆聽中...請說話';
+                if (navigator.vibrate) navigator.vibrate(30);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('語音辨識錯誤：', event.error);
+                statusEl.textContent = '聆聽失敗，請重試';
+                statusEl.className = 'text-base font-bold text-red-500 mb-2';
+                if (event.error === 'not-allowed') {
+                    transcriptEl.textContent = '請允許麥克風權限以進行語音記帳。';
+                } else {
+                    transcriptEl.textContent = `錯誤原因：${event.error}`;
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                transcriptEl.textContent = `「 ${transcript} 」`;
+                transcriptEl.className = 'text-sm font-bold text-slate-800 dark:text-slate-200 min-h-[3rem] px-4 py-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/50 rounded-2xl mb-6 flex items-center justify-center';
+                statusEl.textContent = '正在解析記帳內容...';
+
+                setTimeout(() => {
+                    const parsed = parseVoiceTranscript(transcript);
+                    if (parsed) {
+                        // 1. 收支類型
+                        const typeRadio = document.querySelector(`input[name="type"][value="${parsed.type}"]`);
+                        if (typeRadio) {
+                            typeRadio.checked = true;
+                            typeRadio.dispatchEvent(new Event('change'));
+                        }
+                        
+                        // 2. 金額
+                        document.getElementById('amount').value = parsed.amount;
+                        
+                        // 3. 備註
+                        document.getElementById('note').value = parsed.note;
+
+                        // 4. 分類選擇
+                        selectedCategory = parsed.category;
+                        renderCategoryGrid(parsed.type);
+                        
+                        // 5. 支付方式
+                        selectedPaymentMethod = parsed.paymentMethod;
+                        renderPaymentGrid();
+
+                        if (navigator.vibrate) navigator.vibrate([40, 40]);
+                        showToast(`已填入：${parsed.category} - ${parsed.note} $${parsed.amount.toLocaleString()}`);
+                        
+                        stopVoiceRecognition();
+                    } else {
+                        statusEl.textContent = '解析失敗，無法識別金額';
+                        statusEl.className = 'text-base font-bold text-red-500 mb-2';
+                        transcriptEl.textContent = `識別內容為：「 ${transcript} 」，請說出包含項目的名稱與金額（如：晚餐 150 塊）。`;
+                    }
+                }, 800);
+            };
+
+            recognition.start();
+        }
+
+        function stopVoiceRecognition() {
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch(e) {}
+                recognition = null;
+            }
+            const voiceContent = document.getElementById('voice-modal-content');
+            voiceContent.classList.remove('scale-100');
+            voiceContent.classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('voice-modal').classList.add('hidden');
+                document.getElementById('voice-modal').classList.remove('flex');
+            }, 300);
+        }
+
+        function parseAmount(text) {
+            const cleaned = text.replace(/[\s元塊]/g, '');
+            
+            // 處理數字加單位的混合，例如 "1萬"、"5千"
+            const mixMatch = cleaned.match(/(\d+)\s*萬/);
+            if (mixMatch) {
+                return parseInt(mixMatch[1]) * 10000;
+            }
+            const mixMatchK = cleaned.match(/(\d+)\s*千/);
+            if (mixMatchK) {
+                return parseInt(mixMatchK[1]) * 1000;
+            }
+            const mixMatchH = cleaned.match(/(\d+)\s*百/);
+            if (mixMatchH) {
+                return parseInt(mixMatchH[1]) * 100;
+            }
+
+            const digitMatch = cleaned.match(/\d+/);
+            if (digitMatch) {
+                return parseInt(digitMatch[0]);
+            }
+
+            // 解析中文字元
+            const zhNums = { '零':0, '一':1, '二':2, '兩':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9 };
+            const zhUnits = { '十':10, '百':100, '千':1000, '萬':10000 };
+
+            let total = 0;
+            let temp = 0;
+            let hasZh = false;
+            let unitHistory = [];
+
+            for (let i = 0; i < cleaned.length; i++) {
+                const char = cleaned[i];
+                if (char in zhNums) {
+                    temp = zhNums[char];
+                    hasZh = true;
+                } else if (char in zhUnits) {
+                    const unit = zhUnits[char];
+                    unitHistory.push(unit);
+                    if (unit === 10000) {
+                        if (temp === 0) temp = 1;
+                        total = (total + temp) * 10000;
+                        temp = 0;
+                    } else {
+                        if (temp === 0) temp = 1;
+                        total += temp * unit;
+                        temp = 0;
+                    }
+                    hasZh = true;
+                }
+            }
+            // 處理尾數（例如：一千二）
+            if (temp > 0 && unitHistory.length > 0) {
+                const lastUnit = unitHistory[unitHistory.length - 1];
+                if (lastUnit > 10) {
+                    total += temp * (lastUnit / 10);
+                    temp = 0;
+                }
+            }
+            total += temp;
+
+            if (hasZh && total > 0) {
+                return total;
+            }
+            
+            return null;
+        }
+
+        function parseVoiceTranscript(text) {
+            const rawText = text.trim();
+            if (!rawText) return null;
+
+            // 1. 解析金額
+            const amount = parseAmount(rawText);
+            if (!amount) return null;
+
+            // 2. 判斷支付方式
+            let matchedPayment = '現金';
+            const paymentKeywords = {
+                '現金': ['現金'],
+                '刷卡': ['刷卡', '信用卡', '刷', '卡'],
+                '轉帳': ['轉帳', '匯款', '轉'],
+                '行動支付': ['行動支付', '支付', '賴pay', 'linepay', '街口', '街口支付', 'applepay', 'pay']
+            };
+            
+            for (const [method, keywords] of Object.entries(paymentKeywords)) {
+                if (keywords.some(kw => rawText.toLowerCase().includes(kw))) {
+                    matchedPayment = method;
+                    break;
+                }
+            }
+
+            // 3. 清理字串，取出「備註 (項目說明)」
+            let note = rawText;
+            
+            // 拔除支付關鍵字
+            for (const keywords of Object.values(paymentKeywords)) {
+                keywords.forEach(kw => {
+                    note = note.replace(new RegExp(kw, 'gi'), '');
+                });
+            }
+            
+            // 拔除元/塊/錢/元整
+            note = note.replace(/[元塊錢元整]/g, '');
+            
+            // 拔除阿拉伯數字
+            note = note.replace(/\d+/g, '');
+            
+            // 拔除中文數字
+            const zhChars = /[零一二兩三四五六七八九十百千萬]/g;
+            note = note.replace(zhChars, '');
+            
+            // 清理多餘空格與符號
+            note = note.replace(/[+\-*\/]/g, '').trim();
+
+            // 4. 判斷類別與收支類型
+            let matchedCategory = '';
+            let matchedType = 'expense'; // 預設支出
+
+            const voiceCategoryKeywords = {
+                '食': ['食', '吃', '喝', '早餐', '午餐', '晚餐', '飯', '麵', '點心', '飲料', '咖啡', '麥當勞', '火鍋', '便當', '茶', '水果', '壽司', '牛排', '餐'],
+                '衣': ['衣', '鞋', '褲', '帽', '穿', '裙', '外套', '襪', '襯衫', '服飾', '剪髮', '理髮', '洗頭', '美甲'],
+                '住': ['住', '房租', '水電', '瓦斯', '管理費', '網路費', '家具', '裝潢', '租金', '裝修', '五金', '日用品', '衛生紙', '沐浴乳', '洗髮精', '家'],
+                '行': ['行', '車', '油', '捷運', '公車', '悠遊卡', '一卡通', '計程車', 'Uber', '高鐵', '火車', '機車', '加油', '停車費', '路邊停車', '保養', '輪胎', 'ETC', '過路費'],
+                '育': ['育', '學費', '書', '課', '文具', '補習', '演講', '雜誌', '報紙', '補習班', '報名費', '線上課程'],
+                '樂': ['樂', '玩', '電影', '歌', '遊戲', '玩具', '旅遊', '出國', 'KTV', '門票', '展覽', '住宿', '機票', 'Netflix', 'Spotify', '娛樂', '唱歌', '桌遊'],
+                '醫': ['醫', '看病', '醫生', '藥', '掛號', '牙醫', '中醫', '西醫', '感冒', '診所', '醫院', '健保', '手術'],
+                '薪資': ['薪水', '薪資', '發薪', '主動收入', '薪水袋', '月薪', '獎金', '年終', '打工', '兼職'],
+                '房租': ['收租', '房租收入', '租金收入', '分租'],
+                '股利': ['股利', '配息', '利息', '股息', '股票配息', '分紅'],
+                '保險金': ['保險金', '保險給付', '理賠'],
+                '銀行利息': ['銀行利息', '活存利息', '定存利息'],
+                '其他': ['其他', '雜項']
+            };
+
+            for (const [cat, keywords] of Object.entries(voiceCategoryKeywords)) {
+                if (keywords.some(kw => rawText.includes(kw) || (note && note.includes(kw)))) {
+                    matchedCategory = cat;
+                    break;
+                }
+            }
+
+            if (matchedCategory) {
+                const incomeCategories = ['薪資', '房租', '股利', '保險金', '銀行利息'];
+                if (incomeCategories.includes(matchedCategory)) {
+                    matchedType = 'income';
+                }
+            } else {
+                const incomeHints = ['領錢', '賺', '收入', '進帳', '回饋', '退款', '中獎', '發票中獎'];
+                if (incomeHints.some(hint => rawText.includes(hint))) {
+                    matchedType = 'income';
+                    matchedCategory = '薪資';
+                } else {
+                    matchedType = 'expense';
+                    matchedCategory = '其他';
+                }
+            }
+            
+            if (!note) {
+                note = matchedCategory !== '其他' ? matchedCategory : rawText;
+            }
+
+            return {
+                type: matchedType,
+                amount: amount,
+                category: matchedCategory,
+                paymentMethod: matchedPayment,
+                note: note
+            };
         }
 
         // --- 初始化頁面 ---
