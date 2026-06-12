@@ -1,11 +1,12 @@
 {
   "name": "極簡記帳",
   "short_name": "極簡記帳",
-  "start_url": "index.html",
+  "description": "極簡風格的雲端記帳軟體，支援離線記帳與自動雲端同步",
+  "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
-  "description": "極簡風格的雲端記帳軟體",
+  "theme_color": "#6366f1",
   "icons": [
     {
       "src": "icon-192.png",
@@ -16,6 +17,7 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+			"purpose": "any maskable"
     }
   ]
 }
