@@ -1,4 +1,4 @@
-const CACHE_NAME = 'day-book-cache-v1.1.0';
+const CACHE_NAME = 'day-book-cache-v1.1.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,7 +6,8 @@ const ASSETS_TO_CACHE = [
   './icon-192.png',
   './icon-512.png',
   'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/chart.js'
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js'
 ];
 
 // 安裝事件：快取 App Shell

@@ -15,15 +15,19 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'Noto Sans TC', 'sans-serif'],
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Outfit', 'Noto Sans TC', 'sans-serif'],
+                        }
                     }
                 }
-            }
+            };
+        } else {
+            console.error("Tailwind CSS CDN 載入失敗。");
         }
     </script>
     
@@ -1311,6 +1315,10 @@
             document.getElementById('stats-income-breakdown').innerHTML = renderBreakdown(incomeCats, inc, '該區間無收入資料');
 
             // --- 繪製 Chart.js 圖表 ---
+            if (typeof Chart === 'undefined') {
+                console.warn("Chart.js is not loaded. Skipping chart rendering.");
+                return;
+            }
             const isDark = document.documentElement.classList.contains('dark');
             const textCol = isDark ? '#94a3b8' : '#475569';
             const gridCol = isDark ? '#334155' : '#f1f5f9';
@@ -1713,17 +1721,28 @@
 
         // --- 初始化頁面 ---
         window.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            
-            // 觸發一次單選鈕事件，以渲染初始的支出網格與支付方式
-            document.querySelector('input[name="type"]:checked').dispatchEvent(new Event('change'));
-            renderPaymentGrid();
+            try {
+                initTheme();
+                
+                // 觸發一次單選鈕事件，以渲染初始的支出網格與支付方式
+                const radio = document.querySelector('input[name="type"]:checked');
+                if (radio) {
+                    radio.dispatchEvent(new Event('change'));
+                }
+                renderPaymentGrid();
 
-            // 載入資料
-            if (records.length > 0) {
-                refreshAllViews();
+                // 載入資料
+                if (records.length > 0) {
+                    refreshAllViews();
+                }
+                loadDataFromCloud();
+            } catch (err) {
+                console.error("初始化過程中出錯：", err);
+                // 發生任何錯誤都必須關閉 loader，以免卡死在 "雲端同步中" 遮罩中
+                if (typeof hideLoader === 'function') {
+                    hideLoader();
+                }
             }
-            loadDataFromCloud();
         });
 
         // 斷線與連線事件監聽，自動觸發佇列同步與變更狀態燈
